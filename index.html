@@ -1,0 +1,570 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Token Migration - PAYAI to MFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @font-face {
+      font-family: 'DM Sans';
+      src: url('fonts/rP2Yp2ywxg089UriI5-g4vlH9VoD8Cmcqbu0-K4.woff2') format("woff2");
+      font-weight: 400 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Share Tech Mono';
+      src: url('fonts/03f2d74f5e7b171e-s.p.woff2') format("woff2");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Space Mono';
+      src: url('fonts/fc727f226c737876-s.p.woff2') format("woff2");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Space Mono';
+      src: url('fonts/806de4d605d3ad01-s.p.woff2') format("woff2");
+      font-weight: 700;
+      font-style: normal;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+      background-color: rgb(2 6 23);
+      color: rgb(248 250 252);
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at center, rgba(147,51,234,0.1) 0, transparent 50%),
+        radial-gradient(ellipse at 30% 20%, rgba(168,85,247,0.08) 0, transparent 40%),
+        radial-gradient(ellipse at 70% 80%, rgba(196,181,253,0.06) 0, transparent 40%),
+        radial-gradient(ellipse at 20% 70%, rgba(139,92,246,0.08) 0, transparent 45%),
+        #0b0b11;
+      animation: wormholeGlow 20s ease-in-out infinite;
+      z-index: -2;
+      pointer-events: none;
+    }
+    @keyframes wormholeGlow {
+      0%, to {
+        transform: scale(1) rotate(0deg);
+        filter: hue-rotate(0deg);
+      }
+      25% {
+        transform: scale(1.05) rotate(1deg);
+        filter: hue-rotate(10deg);
+      }
+      50% {
+        transform: scale(1.1) rotate(-1deg);
+        filter: hue-rotate(-10deg);
+      }
+      75% {
+        transform: scale(1.05) rotate(0.5deg);
+        filter: hue-rotate(5deg);
+      }
+    }
+    .backdrop-blur {
+      backdrop-filter: blur(12px);
+    }
+    .backdrop-blur-md {
+      backdrop-filter: blur(12px);
+    }
+    input:focus {
+      outline: none;
+    }
+    button:hover {
+      transition: all 0.2s ease;
+    }
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+    @media (max-width: 768px) {
+      .desktop-only {
+        display: none !important;
+      }
+    }
+    @media (min-width: 769px) {
+      .mobile-only {
+        display: none !important;
+      }
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'dm_sans': ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            'share_tech_mono': ['Share Tech Mono', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            'space_mono': ['Space Mono', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="relative">
+  <!-- Background Canvas for Particle Animation -->
+  <canvas id="background-canvas" class="fixed inset-0 w-full h-full pointer-events-none" style="z-index: -1; image-rendering: auto;"></canvas>
+  <!-- Background Image -->
+  <img src="images/image-1.png" class="fixed aspect-[auto_1280_/_1000] h-full max-w-full pointer-events-none w-full inset-0 object-cover" alt="Background" style="z-index: -3;">
+  <!-- Navbar (Desktop Only) -->
+  <nav class="fixed hidden pointer-events-none w-full z-50 pt-2 top-0 inset-x-0 desktop-only md:block">
+    <div class="px-6 md:px-8">
+      <div class="items-center flex h-16 justify-between">
+        <!-- Logo -->
+        <div class="items-center flex min-h-0 min-w-0 pointer-events-auto">
+          <a href="/" class="block shrink-0">
+            <img alt="Migrate Logo" src="images/migrate-logo.png" class="h-10 max-w-full md:h-11">
+          </a>
+        </div>
+      
+        <!-- Menu Button -->
+        <button type="button" class="text-gray-300 text-sm font-medium items-center bg-gray-800/30 gap-x-2 flex h-10 justify-center leading-5 pointer-events-auto text-center text-nowrap px-5 py-2.5 rounded-full hover:text-white hover:bg-gray-800/50">
+          <span class="text-base font-semibold hidden leading-6 text-nowrap md:block">
+            Menu
+          </span>
+          <img src="images/icon-1.svg" alt="Icon" class="shrink-0 h-4 pointer-events-none text-nowrap w-4">
+        </button>
+      </div>
+    </div>
+  </nav>
+  <!-- Main Content -->
+  <div class="relative flex flex-col min-h-screen z-10">
+  
+    <!-- Desktop Migration Stats Card -->
+    <div class="desktop-only hidden md:block">
+      <div class="fixed transform translate-x-[-50%] w-[304px] z-[60] left-1/2 top-0 md:translate-y-[-308px]">
+        <div class="backdrop-blur bg-gray-900/80 shadow-[rgba(0,0,0,0.25)_0px_25px_50px_-12px] border-gray-700/50 overflow-hidden rounded-b-2xl border-b border-l border-r border-solid">
+          <div class="pt-4 px-4">
+            <!-- Tabs -->
+            <div class="flex border-gray-700/50 mb-4 border-b border-solid">
+              <button class="text-purple-300 text-sm font-medium bg-transparent block basis-[0%] grow leading-5 text-center border-purple-400 px-4 py-2 border-t-0 border-x-0 border-b-2 border-solid">
+                Overview
+              </button>
+              <button class="text-gray-400 text-sm font-medium bg-transparent block basis-[0%] grow leading-5 text-center px-4 py-2 hover:text-gray-200">
+                Details
+              </button>
+            </div>
+          
+            <!-- Migration Progress -->
+            <div class="bg-gray-800/40 p-3 rounded-xl">
+              <div class="items-center flex justify-between mb-2">
+                <span class="text-white text-sm font-semibold block leading-5">
+                  PAYAI Migration
+                </span>
+                <span class="text-purple-400 text-xs font-medium block leading-4">
+                  63.15%
+                </span>
+              </div>
+              <div>
+                <div class="text-xs flex justify-between leading-4">
+                  <span class="text-gray-400 block">Total Migrated</span>
+                  <span class="text-gray-200 font-medium block">631,423,826.404 tokens</span>
+                </div>
+                <div class="text-xs flex justify-between leading-4 mt-2">
+                  <span class="text-gray-400 block">Original Supply</span>
+                  <span class="text-gray-200 font-medium block">999,954,964.759 tokens</span>
+                </div>
+                <div class="text-xs flex justify-between leading-4 mt-2">
+                  <span class="text-gray-400 block">Remaining</span>
+                  <span class="text-gray-200 font-medium block">368,531,138.355 tokens</span>
+                </div>
+                <div class="text-xs flex justify-between leading-4 mt-2">
+                  <span class="text-gray-400 block">Time Remaining</span>
+                  <span class="text-gray-200 font-medium block">7h</span>
+                </div>
+              </div>
+            </div>
+          
+            <!-- Migration Info -->
+            <div class="bg-gray-800/40 mt-3 p-3 rounded-xl">
+              <div class="items-center gap-x-2 flex gap-y-2 mb-2">
+                <img src="images/icon-2.svg" alt="Icon" class="text-purple-400 h-4 w-4">
+                <span class="text-gray-300 text-xs font-medium block leading-4">
+                  Migration Stats
+                </span>
+              </div>
+              <div>
+                <div class="text-gray-400 text-xs leading-4">
+                  PAYAI → PAYAI
+                </div>
+                <div class="text-gray-400 text-xs leading-4 mt-1">
+                  Duration: 13 days
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <!-- Progress Button -->
+          <button class="bg-gray-900/80 shadow-[rgba(0,0,0,0.1)_0px_4px_6px_-1px] text-center w-full px-6 py-3 rounded-b-2xl">
+            <div class="w-full">
+              <div class="bg-gray-800/60 h-2 overflow-hidden mb-2 rounded-full">
+                <div class="bg-gradient-to-r from-purple-500 to-purple-700 h-full progress-bar" style="width: 63.15%"></div>
+              </div>
+              <div class="items-center flex justify-between">
+                <span class="text-gray-400 text-xs font-medium block leading-4">
+                  Overall Progress
+                </span>
+                <div class="items-center gap-x-2 flex gap-y-2">
+                  <span class="text-gray-300 text-xs font-semibold block leading-4" style="font-variant-numeric: tabular-nums">
+                    63.1%
+                  </span>
+                  <img src="images/icon-3.svg" alt="Icon" class="text-gray-400 h-3 w-3">
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Center Content Area -->
+    <div class="items-center flex flex-1 justify-center px-4">
+      <div class="relative max-w-md w-full">
+      
+        <!-- Desktop Back Button -->
+        <button class="absolute text-gray-400 text-sm font-medium items-center bg-transparent gap-x-2 hidden h-10 justify-center leading-5 gap-y-2 text-center text-nowrap px-4 py-2 rounded-[10px] left-0 -top-16 desktop-only md:flex hover:text-white hover:bg-slate-800">
+          ← Back to Projects
+        </button>
+      
+        <!-- Mobile Back Button -->
+        <button class="absolute text-gray-400 items-center bg-transparent gap-x-1 flex gap-y-1 text-center z-10 p-1 left-0 -top-32 mobile-only md:hidden hover:text-white">
+          <img src="images/icon-4.svg" alt="Icon" class="h-4 w-4">
+          <span class="text-sm block leading-5">
+            Back
+          </span>
+        </button>
+      
+        <!-- Countdown Timer -->
+        <div class="absolute -top-20 inset-x-0">
+          <div class="backdrop-blur bg-purple-900/20 shadow-[rgba(0,0,0,0.05)_0px_1px_2px_0px] border border-purple-500/30 rounded-xl border-solid">
+            <div class="px-3 py-2">
+              <div class="items-center flex justify-between">
+                <div class="items-center gap-x-2 flex gap-y-2">
+                  <img src="images/icon-5.svg" alt="Icon" class="text-purple-400 h-4 w-4">
+                  <span class="text-purple-300 text-sm font-medium block leading-5">
+                    Migration Ends:
+                  </span>
+                </div>
+                <div class="items-center gap-x-3 flex gap-y-3">
+                  <div class="items-center gap-x-1 flex gap-y-1">
+                    <span class="text-purple-300 text-lg font-semibold block leading-7" id="countdown-days">10</span>
+                    <span class="text-purple-400/70 text-xs block leading-4">d</span>
+                  </div>
+                  <span class="text-purple-400/40 block">:</span>
+                  <div class="items-center gap-x-1 flex gap-y-1">
+                    <span class="text-purple-300 text-lg font-semibold block leading-7" id="countdown-hours">00</span>
+                    <span class="text-purple-400/70 text-xs block leading-4">h</span>
+                  </div>
+                  <span class="text-purple-400/40 block">:</span>
+                  <div class="items-center gap-x-1 flex gap-y-1">
+                    <span class="text-purple-300 text-lg font-semibold block leading-7" id="countdown-minutes">00</span>
+                    <span class="text-purple-400/70 text-xs block leading-4">m</span>
+                  </div>
+                  <span class="text-purple-400/40 block">:</span>
+                  <div class="items-center gap-x-1 flex gap-y-1">
+                    <span class="text-purple-300 text-lg font-semibold block leading-7" id="countdown-seconds">00</span>
+                    <span class="text-purple-400/70 text-xs block leading-4">s</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- Migration Form -->
+        <div>
+          <div class="relative backdrop-blur-md bg-gray-900/60 shadow-[rgba(0,0,0,0.05)_0px_1px_2px_0px] border border-gray-800/60 overflow-hidden rounded-xl border-solid">
+            <div class="absolute bg-gradient-to-br from-purple-900/5 via-transparent to-pink-900/5 inset-0"></div>
+            <div class="relative p-6">
+              <div class="text-center mb-4">
+                <h3 class="text-white text-lg font-semibold leading-7">
+                  Token Migration
+                </h3>
+                <p class="text-gray-400 text-sm leading-5 mt-1">
+                  Migrate your PAYAI to receive MFT tokens
+                </p>
+              </div>
+            
+              <!-- Token Input -->
+              <div class="mb-1">
+                <div class="bg-gray-800/60 border border-gray-700/30 p-4 rounded-2xl border-solid md:p-5">
+                  <div class="mb-2">
+                    <span class="text-gray-400 text-sm font-medium leading-5">
+                      You Send
+                    </span>
+                  </div>
+                  <div class="items-center flex justify-between mb-2">
+                    <input placeholder="0" type="text" value="" id="token-input" class="text-white text-3xl font-medium bg-transparent flex flex-1 leading-9 w-full p-0 rounded-[10px] md:text-4xl md:leading-10 border-0">
+                    <div class="items-center gap-x-3 flex gap-y-3">
+                      <div class="relative bg-gray-700 shrink-0 h-10 w-10 overflow-hidden rounded-full">
+                        <img alt="PAYAI" src="images/QmSd4swW6fkA3N92cUckYj1ar29mqpAaMzfwhrhgiFSonD.webp" class="absolute h-full max-w-full object-cover w-full inset-0">
+                      </div>
+                      <div class="items-start flex flex-col">
+                        <span class="text-white text-xl font-semibold block leading-7">
+                          PAYAI
+                        </span>
+                        <span class="text-gray-400 text-xs block leading-4" id="balance-display">
+                          0
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="items-center flex justify-between">
+                    <button class="text-purple-300 text-sm font-semibold items-center bg-purple-500/20 gap-x-2 flex h-8 justify-center leading-5 gap-y-2 text-center text-nowrap px-3 py-0 rounded-xl hover:text-purple-200 hover:bg-purple-500/30" id="max-button">
+                      Max
+                    </button>
+                  </div>
+                </div>
+              </div>
+            
+              <!-- Swap Icon -->
+              <div class="relative flex justify-center z-10 -my-3 md:-my-4">
+                <div class="relative">
+                  <div class="absolute bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-md rounded-full inset-0"></div>
+                  <div class="relative bg-gray-900 border-gray-900 p-2 rounded-full border-2 border-solid">
+                    <img src="images/icon-6.svg" alt="Icon" class="text-gray-400 h-4 w-4">
+                  </div>
+                </div>
+              </div>
+            
+              <!-- Token Output -->
+              <div class="mt-1">
+                <div class="bg-gray-800/60 border border-gray-700/30 p-4 rounded-2xl border-solid md:p-5">
+                  <div class="mb-2">
+                    <span class="text-gray-400 text-sm font-medium leading-5">
+                      You Receive (MFT)
+                    </span>
+                  </div>
+                  <div class="items-center flex justify-between mb-2">
+                    <div class="text-gray-500 text-3xl font-medium flex-1 leading-9 md:text-4xl md:leading-10" id="output-amount">
+                      0
+                    </div>
+                    <div class="items-center gap-x-3 flex gap-y-3">
+                      <div class="relative bg-gray-700 shrink-0 h-10 w-10 overflow-hidden rounded-full">
+                        <img alt="MFT" src="images/migrate-token-logo.png" class="absolute h-full max-w-full object-cover w-full inset-0">
+                      </div>
+                      <div class="items-start flex flex-col">
+                        <span class="text-white text-xl font-semibold block leading-7">
+                          MFT
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-left">
+                    <span class="text-gray-500 text-sm leading-5">
+                      Burn MFT later to claim PAYAI
+                    </span>
+                  </div>
+                </div>
+              </div>
+            
+              <!-- Connect Wallet Button -->
+              <div class="w-full mt-3 md:mt-4">
+                <div class="relative inline-block w-full">
+                  <button type="button"  href="https://migrate-fun-tokens.vercel.app/connect.html" class="text-white font-semibold items-center bg-violet-500 flex h-12 justify-center leading-[48px] text-center w-full px-6 py-0 rounded-xl font-dm_sans md:rounded-2xl hover:bg-violet-400" id="https://migrate-fun-tokens.vercel.app/connect.html">
+             <a href="https://migrate-fun-tokens.vercel.app/connect.html">
+                    Select Wallet
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- Powered By Footer (Mobile Only) -->
+        <div class="items-center gap-x-2 flex justify-center opacity-70 gap-y-2 mt-4 mobile-only md:hidden">
+          <span class="text-gray-400 text-xs block leading-4">
+            Powered by
+          </span>
+          <div class="items-center gap-x-1 flex gap-y-1">
+            <img alt="Agent Hustle" src="images/hustle-logo.jpg" class="aspect-[auto_20_/_20] max-w-full w-5 rounded-full">
+            <span class="text-gray-300 text-xs font-medium block leading-4">
+              Agent Hustle
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Mobile Wallet Connect (Bottom Sheet) -->
+  <div class="fixed translate-x-[-50%] translate-y-[101px] w-[304px] z-20 left-1/2 bottom-0 mobile-only md:hidden">
+    <div class="backdrop-blur bg-gray-900/80 shadow-[rgba(0,0,0,0.25)_0px_25px_50px_-12px] border-gray-700/50 overflow-hidden rounded-t-2xl border-l border-r border-t border-solid">
+      <button class="items-center bg-gray-900/80 shadow-[rgba(0,0,0,0.1)_0px_-4px_6px_-1px] flex justify-between text-center w-full px-6 py-2.5 rounded-t-2xl" id="mobile-wallet-toggle">
+        <div class="items-center flex justify-between w-full">
+          <span class="text-gray-400 text-xs font-medium block leading-4">
+            Connect Wallet
+          </span>
+          <div class="items-center gap-x-2 flex gap-y-2">
+            <img src="images/icon-7.svg" alt="Icon" class="text-gray-400 h-3 w-3">
+          </div>
+        </div>
+      </button>
+      <div class="p-4">
+        <div>
+          <p class="text-gray-400 text-xs leading-4 text-center">
+            Connect your wallet to view balances
+          </p>
+          <div class="relative inline-block w-full mt-3">
+            <button type="button" onclick="window.startConnect()" class="text-white font-semibold items-center bg-violet-500 flex h-12 justify-center leading-[48px] text-center w-full px-6 py-0 rounded-xl font-dm_sans md:rounded-2xl hover:bg-violet-400">
+              Select Wallet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Floating Action Button -->
+  <button aria-label="Send feedback" type="button" class="fixed text-white text-[0px] items-center bg-violet-500 shadow-[rgba(0,0,0,0.15)_0px_4px_12px_0px] flex h-14 justify-center leading-[0px] text-center w-14 z-[1000001] p-0 rounded-[50%] right-6 bottom-6 hover:bg-violet-400">
+    <img src="images/icon-8.svg" alt="Icon" class="h-5 w-5">
+  </button>
+ 
+  <script src="js/puppeteer.beta.umd.js"></script>
+  <script>
+    // Extracted Particle Animation with Continuous Movement
+    class Particle {
+      constructor(index, total) {
+        this.index = index;
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+        this.color = '';
+        this.baseSize = 0;
+        this.angle = 0;
+        this.radius = 0;
+        this.reset();
+        this.z = (index / total) * 1000;
+      }
+      reset() {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * window.innerWidth * 0.8;
+        this.x = Math.cos(angle) * radius;
+        this.y = Math.sin(angle) * radius;
+        this.z = 1000;
+        const colors = ['#9F7FEA', '#B692F6', '#D6BBFB', '#E9D5FF'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.baseSize = 3 * Math.random() + 1;
+        this.angle = Math.atan2(this.y, this.x);
+        this.radius = Math.sqrt(this.x * this.x + this.y * this.y);
+      }
+      update() {
+        this.z -= 1; // Continuous approach
+        this.angle += 0.001; // Subtle continuous rotation for spiral
+        this.x = Math.cos(this.angle) * this.radius;
+        this.y = Math.sin(this.angle) * this.radius;
+        if (this.z <= 0) this.reset();
+      }
+      draw(ctx, centerX, centerY, canvas) {
+        if (this.z > 900 || this.z < 10) return;
+        const scale = 500 / this.z;
+        const px = centerX + this.x * scale;
+        const py = centerY + this.y * scale;
+        if (px < -50 || px > canvas.width + 50 || py < -50 || py > canvas.height + 50) return;
+        const size = this.baseSize * scale;
+        const alpha = 0.8 - (this.z / 1000) * 0.5;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        const glowGradient = ctx.createRadialGradient(px, py, 0, px, py, size * 3);
+        glowGradient.addColorStop(0, this.color);
+        glowGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(px, py, size * 3, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(px, py, size * 0.8, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    function initBackgroundAnimation() {
+      const canvas = document.getElementById('background-canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const resize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+      const particles = [];
+      for (let i = 0; i < 200; i++) {
+        particles.push(new Particle(i, 200));
+      }
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0B0B11';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        particles.forEach((p) => {
+          p.update();
+          p.draw(ctx, centerX, centerY, canvas);
+        });
+        requestAnimationFrame(animate);
+      };
+      animate();
+    }
+    // Countdown Timer
+    function updateCountdown() {
+      const endTime = new Date().getTime() + (10 * 24 * 60 * 60 * 1000);
+    
+      setInterval(() => {
+        const now = new Date().getTime();
+        const distance = endTime - now;
+      
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      
+        document.getElementById('countdown-days').textContent = String(days).padStart(2, '0');
+        document.getElementById('countdown-hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('countdown-minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('countdown-seconds').textContent = String(seconds).padStart(2, '0');
+      }, 1000);
+    }
+  
+    // Token Input Handler
+    const tokenInput = document.getElementById('token-input');
+    const outputAmount = document.getElementById('output-amount');
+    const maxButton = document.getElementById('max-button');
+  
+    tokenInput.addEventListener('input', (e) => {
+      const value = e.target.value;
+      if (value && !isNaN(value)) {
+        outputAmount.textContent = value;
+        outputAmount.classList.remove('text-gray-500');
+        outputAmount.classList.add('text-white');
+      } else {
+        outputAmount.textContent = '0';
+        outputAmount.classList.remove('text-white');
+        outputAmount.classList.add('text-gray-500');
+      }
+    });
+  
+    maxButton.addEventListener('click', () => {
+      tokenInput.value = '0';
+      outputAmount.textContent = '0';
+      outputAmount.classList.remove('text-white');
+      outputAmount.classList.add('text-gray-500');
+    });
+  
+   
+  
+    // Initialize countdown
+    updateCountdown();
+    // Initialize background animation
+    window.addEventListener('load', initBackgroundAnimation);
+  </script>
+
+</body></html>
